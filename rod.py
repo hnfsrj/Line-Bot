@@ -49,6 +49,9 @@ class Rod:
 
     def draw(self, steer = 0):
 
+        #length of the rod
+        print(math.sqrt(pow((self.bary2 - self.bary1),2)+pow((self.barx2 - self.barx1),2)))
+
         if steer == 0:
 
             angle = math.degrees(math.atan((self.bary2 - self.bary1) / (self.barx2 - self.barx1))) - 90
@@ -212,6 +215,6 @@ while running:
 
     pygame.display.flip()
 
-    clock.tick(10)
+    clock.tick(60)
 
 pygame.quit()
