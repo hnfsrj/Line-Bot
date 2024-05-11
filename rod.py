@@ -10,87 +10,72 @@ running = True
 
 
 
-rods = []
+bots = []
 
 
 class Rod:
     def __init__(self):
-        x,y = pygame.mouse.get_pos()
+        self.x,self.y = pygame.mouse.get_pos()
 
         self.length = 60
+        self.radius = self.length/2
 
-        self.x = x
-        self.y = y
-
-        self.barx1 = self.x-(self.length/2)
+        self.barx1 = self.x-self.radius
         self.bary1 = self.y
 
-        self.barx2 = self.x+(self.length/2)
+        self.barx2 = self.x+self.radius
         self.bary2 = self.y
-
-        self.left_wheel_x = self.x-(self.length/2)
-        self.left_wheel_y = self.y
-
-        self.right_wheel_x = self.x+(self.length/2)
-        self.right_wheel_y = self.y
-
-        self.radius = self.length/2
-        self.direction = 1
 
         self.speed = 1
         self.degree = 0
 
-    def draw_rod(self,bx1,by1,bx2,by2):
-        pygame.draw.line(screen, (255,255,255), (bx1,by1), (bx2,by2),5)
+    def draw_rod(self):
+        pygame.draw.line(screen, (255,255,255), (self.barx1,self.bary1), (self.barx2,self.bary2),5)
 
-    def draw_tire(self,lx,ly,rx,ry):
-        pygame.draw.circle(screen,(255,0,0),(lx,ly),10)
-        pygame.draw.circle(screen,(255,0,0),(rx,ry),10)
+    
 
 
+    
+
+
+
+
+
+class Tires(Rod):
+
+    def __init__(self):
+        super().__init__()
+
+        self.tire_size = 10
+
+
+    def draw_tire(self):
+        pygame.draw.circle(screen,(255,0,0),(self.barx1,self.bary1),self.tire_size)
+        pygame.draw.circle(screen,(255,0,0),(self.barx2,self.bary2),self.tire_size)
+
+
+
+
+
+
+class Robot(Tires):
+    
     def draw(self, steer = 0):
+        self.steering(steer)
+
+        self.draw_rod()
+        self.draw_tire()
 
 
-        if steer == 0:
+    def steering(self, steer):
 
-            if self.degree == -359 or self.degree == 359:
-                self.degree = 0
-            
-            angle = -1*self.degree + 90
-
-
-            radian = math.radians(angle)
-
-
-
-            add_x = self.speed * math.cos(radian)
-            add_y = self.speed * math.sin(radian)
-            
-            
-            self.barx1 += add_x
-            self.bary1 -= add_y
-
-            self.barx2 += add_x
-            self.bary2 -= add_y
-
-
-            self.left_wheel_x = self.barx1
-            self.left_wheel_y = self.bary1
-
-            self.right_wheel_x = self.barx2
-            self.right_wheel_y = self.bary2
+        if self.degree == -359 or self.degree == 359:
+            self.degree = 0
 
 
 
-            self.draw_rod(self.barx1,self.bary1,self.barx2,self.bary2)
-            self.draw_tire(self.left_wheel_x,self.left_wheel_y,self.right_wheel_x,self.right_wheel_y)
-
-        elif steer == 1:
-
-            if self.degree == -359 or self.degree == 359:
-                self.degree = 0
-            else:
-                self.degree += 1
+        if steer == 1:
+            self.degree += 1
 
             angle = math.radians(self.degree + 180)
 
@@ -100,37 +85,31 @@ class Rod:
             self.barx1 = self.barx2+change_x
             self.bary1 = self.bary2+change_y
 
-            
-
-
-            self.left_wheel_x = self.barx1
-            self.left_wheel_y = self.bary1
-
-            self.draw_rod(self.barx1,self.bary1,self.barx2,self.bary2)
-            self.draw_tire(self.left_wheel_x,self.left_wheel_y,self.right_wheel_x,self.right_wheel_y)
-
-
         elif steer == -1:
+            self.degree -= 1
 
             angle = math.radians(self.degree)
+            
             change_x = self.length * math.cos(angle)
             change_y = self.length * math.sin(angle)
 
             self.barx2 = self.barx1+change_x
             self.bary2 = self.bary1+change_y
 
-            if self.degree == -359 or self.degree == 359:
-                self.degree = 0
-            else:
-                self.degree -= 1
+        else:
+            angle = math.radians(-1*self.degree + 90)
+
+            add_x = self.speed * math.cos(angle)
+            add_y = self.speed * math.sin(angle)
+
+            self.barx1 += add_x
+            self.bary1 -= add_y
+
+            self.barx2 += add_x
+            self.bary2 -= add_y
+        
 
 
-            self.right_wheel_x = self.barx2
-            self.right_wheel_y = self.bary2
-
-
-            self.draw_rod(self.barx1,self.bary1,self.barx2,self.bary2)
-            self.draw_tire(self.left_wheel_x,self.left_wheel_y,self.right_wheel_x,self.right_wheel_y)
 
 
 
@@ -146,7 +125,7 @@ while running:
             running = False
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            rods.append(Rod())
+            bots.append(Robot())
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
@@ -158,7 +137,7 @@ while running:
         
     
 
-    for i in rods:
+    for i in bots:
         i.draw(rotate)
 
     pygame.display.flip()
