@@ -32,11 +32,10 @@ class Rod:
 
     def draw_rod(self):
         pygame.draw.line(screen, (255,255,255), (self.barx1,self.bary1), (self.barx2,self.bary2),5)
+        
+        
 
-    
 
-
-    
 
 
 
@@ -98,18 +97,49 @@ class Sensor(Tires):
             return 1
 
 
-          
 
-class Robot(Sensor):
+
+class Image(Sensor):
+    def __init__(self):
+        super().__init__()
+
+        self.aspect_ratio = 1.6
+        self.image_width = 50
+        self.image_height = self.image_width * self.aspect_ratio
+
+        self.image_x = (self.barx1 + self.barx2)/2
+        self.image_y = (self.bary1 + self.bary2)/2
+
+
+        self.loaded_image = pygame.image.load("tank.png")
+        self.scaled_image = pygame.transform.scale(self.loaded_image , (self.image_width,self.image_height))
+        self.rotated_image = pygame.transform.rotate(self.scaled_image, self.degree)
+        
+        self.image_rect = self.rotated_image.get_rect(center = (self.image_x, self.image_y))
+
+    def draw_image(self):
+
+        self.rotated_image = pygame.transform.rotate(self.scaled_image, -1*self.degree)
+
+        self.image_x = (self.barx1 + self.barx2)/2
+        self.image_y = (self.bary1 + self.bary2)/2
+
+        self.image_rect = self.rotated_image.get_rect(center = (self.image_x, self.image_y))
+        
+        screen.blit(self.rotated_image, self.image_rect)
+
+
+class Robot(Image):
     
     def draw(self):
 
         steer = self.sensing()
         self.steering(steer)
 
-        self.draw_rod()
-        self.draw_tire()
-        self.draw_sensor()
+        # self.draw_rod()
+        # self.draw_tire()
+        # self.draw_sensor()
+        self.draw_image()
 
     def steering(self, steer):
 
@@ -151,6 +181,7 @@ class Robot(Sensor):
             self.barx2 = self.barx1+change_x
             self.bary2 = self.bary1+change_y
 
+
             if self.first:
                 self.history = -1
                 self.set = True
@@ -168,6 +199,9 @@ class Robot(Sensor):
             self.barx2 += add_x
             self.bary2 -= add_y
 
+            self.pic_x = (self.barx1 + self.barx2)/2 - (self.image_width/2)
+            self.pic_y = (self.bary1 + self.bary2)/2 - (self.image_height/2)
+
             if self.set:
                 self.rotation = self.history
                 self.set = False
@@ -182,4 +216,7 @@ class Robot(Sensor):
 
         self.sensor_x = (self.barx1 + self.barx2)/2 + s_add_x
         self.sensor_y = (self.bary1 + self.bary2)/2 - s_add_y
+
+        
+
 
