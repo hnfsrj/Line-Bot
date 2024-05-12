@@ -1,16 +1,17 @@
 
-import pygame
 import math
 
-pygame.init()
-screen = pygame.display.set_mode((1280, 720))
-clock = pygame.time.Clock()
-running = True
+
+def init(py, scr, cir, Circ):
+    global pygame,screen,circles, Circle
+
+    pygame = py
+    screen = scr
+    circles = cir
+    Circle = Circ
 
 
 
-
-bots = []
 
 
 class Rod:
@@ -56,16 +57,57 @@ class Tires(Rod):
 
 
 
-
-
-class Robot(Tires):
+class Sensor(Tires):
     
-    def draw(self, steer = 0):
+    def __init__(self):
+        super().__init__()
+
+        self.sensor_x = self.x
+        self.sensor_y = self.y
+        self.sensor_size = 5
+        self.time = 50
+        self.timer = 0
+
+    def draw_sensor(self):
+        pygame.draw.circle(screen,(0,0,255),(self.sensor_x,self.sensor_y),self.sensor_size)
+
+
+
+    def sensing(self):
+
+        collision_distance = self.sensor_size + Circle.radius
+
+        for i in circles:
+            distance_in_between =  math.sqrt(math.pow((i.position[0] - self.sensor_x),2)+math.pow((i.position[1] - self.sensor_y),2))
+            
+            if distance_in_between <= collision_distance:
+                self.timer = 0
+                return 0
+            
+
+        
+        if self.timer < self.time:
+            self.timer += 1
+            return -1
+        else:
+            return 1
+
+
+          
+
+class Robot(Sensor):
+
+    def __init__(self):
+        super().__init__()
+    
+    def draw(self):
+
+        steer = self.sensing()
         self.steering(steer)
 
         self.draw_rod()
         self.draw_tire()
-
+        self.draw_sensor()
 
     def steering(self, steer):
 
@@ -111,37 +153,6 @@ class Robot(Tires):
 
 
 
+        self.sensor_x = (self.barx1 + self.barx2)/2
+        self.sensor_y = (self.bary1 + self.bary2)/2
 
-
-rotate = 0
-    
-
-while running:
-
-    screen.fill("purple")
-    
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            bots.append(Robot())
-
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
-                rotate = -1
-            elif event.key == pygame.K_RIGHT:
-                rotate = 1
-            elif event.key == pygame.K_UP:
-                rotate = 0
-        
-    
-
-    for i in bots:
-        i.draw(rotate)
-
-    pygame.display.flip()
-
-    clock.tick(60)
-
-pygame.quit()
