@@ -65,7 +65,7 @@ class Sensor(Tires):
         self.sensor_x = self.x
         self.sensor_y = self.y
         self.sensor_size = 5
-        self.time = 20
+        self.time = 100
         self.timer = 0
 
     def draw_sensor(self):
@@ -82,20 +82,33 @@ class Sensor(Tires):
             
             if distance_in_between <= collision_distance:
                 self.timer = 0
+
+                if self.first:
+                    self.set = True
+
                 return 0
             
 
-        
-        if self.timer < self.time:
-            self.timer += 1
-            return -1
+        if self.first:
+            if self.timer < self.time:
+                self.timer += 1
+                return -1
+            else:
+                return 1
         else:
-            return 1
+            return self.rotation
 
 
           
 
 class Robot(Sensor):
+
+    def __init__(self):
+        super().__init__()
+
+        self.first = True
+        self.set = False
+        self.rotation = 0
     
     def draw(self):
 
@@ -127,6 +140,10 @@ class Robot(Sensor):
             self.barx1 = self.barx2+change_x
             self.bary1 = self.bary2+change_y
 
+            if self.first and not self.set:
+                self.first = False
+                self.rotation = 1
+
         elif steer == -1:
 
             self.last_steer = -1
@@ -140,6 +157,10 @@ class Robot(Sensor):
 
             self.barx2 = self.barx1+change_x
             self.bary2 = self.bary1+change_y
+
+            if not self.set:
+                self.first = False
+                self.rotation = -1
 
         else:
 
@@ -155,11 +176,8 @@ class Robot(Sensor):
             self.bary2 -= add_y
         
 
-        s_angle = math.radians(-1*self.degree + 90)
 
-        s_add_x = 30 * math.cos(s_angle)
-        s_add_y = 30 * math.sin(s_angle)
 
-        self.sensor_x = (self.barx1 + self.barx2)/2 + s_add_x
-        self.sensor_y = (self.bary1 + self.bary2)/2 - s_add_y
+        self.sensor_x = (self.barx1 + self.barx2)/2
+        self.sensor_y = (self.bary1 + self.bary2)/2
 
