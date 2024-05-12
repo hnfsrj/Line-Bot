@@ -67,6 +67,9 @@ class Sensor(Tires):
         self.sensor_size = 5
         self.time = 20
         self.timer = 0
+        self.first = True
+        self.set = False
+        self.history = 0
 
     def draw_sensor(self):
         pygame.draw.circle(screen,(0,0,255),(self.sensor_x,self.sensor_y),self.sensor_size)
@@ -85,6 +88,8 @@ class Sensor(Tires):
                 return 0
             
 
+        if not self.first:
+            return self.rotation
         
         if self.timer < self.time:
             self.timer += 1
@@ -127,6 +132,11 @@ class Robot(Sensor):
             self.barx1 = self.barx2+change_x
             self.bary1 = self.bary2+change_y
 
+            if self.first:
+                self.history = 1
+                self.set = True
+
+
         elif steer == -1:
 
             self.last_steer = -1
@@ -141,6 +151,10 @@ class Robot(Sensor):
             self.barx2 = self.barx1+change_x
             self.bary2 = self.bary1+change_y
 
+            if self.first:
+                self.history = -1
+                self.set = True
+
         else:
 
             angle = math.radians(-1*self.degree + 90)
@@ -153,6 +167,12 @@ class Robot(Sensor):
 
             self.barx2 += add_x
             self.bary2 -= add_y
+
+            if self.set:
+                self.rotation = self.history
+                self.set = False
+                self.first = False
+                
         
 
         s_angle = math.radians(-1*self.degree + 90)
